@@ -18,7 +18,7 @@ namespace COMP2084GetMeAGame.Controllers
         }
         public IActionResult Index()
         {
-            //get list of categories to sidplay to customers on the main shopping page
+            //get list of categories to display to customers on the main shopping page
             var categories = _context.Categories.OrderBy(c => c.Name).ToList();
             return View(categories);
         }
