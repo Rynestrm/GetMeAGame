@@ -23,8 +23,17 @@
                     <partial name="_LoginPartial" />
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Shop Now</a>
+                            <a class="nav-link text-dark" asp-controller="Shop" asp-action="Index">Shop Now</a>
                         </li>
+                        @if (User.IsInRole("Administrator"))
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Categories" asp-action="Index">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Products" asp-action="Index">Products</a>
+                        </li>
+                        }
                     </ul>
                 </div>
             </div>

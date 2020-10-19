@@ -9,9 +9,11 @@ using COMP2084GetMeAGame.Data;
 using COMP2084GetMeAGame.Models;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace COMP2084GetMeAGame.Controllers
 {
+    [Authorize(Roles = "Administrator")]
     public class ProductsController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -28,7 +30,7 @@ namespace COMP2084GetMeAGame.Controllers
             return View(await applicationDbContext.OrderBy(p => p.Name).ToListAsync());
         }
 
-        // GET: Products/Details/5
+        // GET: Products/Details/
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
