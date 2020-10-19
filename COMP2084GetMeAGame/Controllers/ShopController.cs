@@ -20,7 +20,7 @@ namespace COMP2084GetMeAGame.Controllers
         {
             //get list of categories to sidplay to customers on the main shopping page
             var categories = _context.Categories.OrderBy(c => c.Name).ToList();
-            return View();
+            return View(categories);
         }
     }
 }
