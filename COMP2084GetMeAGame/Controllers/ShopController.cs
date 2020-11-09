@@ -6,6 +6,7 @@ using COMP2084GetMeAGame.Data;
 using COMP2084GetMeAGame.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace COMP2084GetMeAGame.Controllers
 {
@@ -76,6 +77,17 @@ namespace COMP2084GetMeAGame.Controllers
             }
 
             return HttpContext.Session.GetString("CustomerId");
+        }
+
+        //Shop/Cart
+        public IActionResult Cart()
+        {
+            // get CustomerId from the session variable
+            var customerId = HttpContext.Session.GetString("CustomerId");
+            // get items in this customer's cart
+            var cartItems = _context.Carts.Include(c => c.Product).Where(c => c.CustomerId == customerId).ToList();
+            // load the cart page and display the customer's items
+            return View(cartItems);
         }
     }
 }
