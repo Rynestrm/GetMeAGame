@@ -1,0 +1,30 @@
+﻿@model IEnumerable<COMP2084GetMeAGame.Models.Product>
+
+<h1>Browse our Products</h1>
+
+<section class="row card-group">
+    @foreach (var p in Model)
+    {
+        <!--css from https://stackoverflow.com/questions/36430816/bootstrap-4-card-deck-with-number-of-columns-based-on-viewport?noredirect=1&lq=1-->
+        <div class="col-sm-6 col-lg-4 mb-3">
+            <div class="card mb-4 text-center h-100">
+                <div class="card-body">
+                    <a asp-controller="Products" asp-action="Details" asp-route-id="@p.Id" class="h5">@p.Name</a>
+                    <h6>@String.Format("{0:c}", p.Price)</h6>
+                    @if (p.Photo != null)
+                    {
+                    <img src="~/img/product-uploads/@p.Photo" alt="product Image" class="img-thumbnail"/>
+                    }
+                <form method="post" action="/Shop/AddToCart">
+                    <fieldset class="form-group">
+                        <label class="control-label" for="Quantity">Quantiy:</label>
+                        <input name="Quantity" id="Quantity" required min="1" max="99999" type="number" class="img-thumbnail" />
+                    </fieldset>
+                    <button class="btn btn-primary">Add to Cart</button>
+                    <input name="ProductId" id="ProductId" type="hidden" value="@p.Id" />
+                </form>
+                </div>
+            </div>
+        </div>
+     }
+</section>

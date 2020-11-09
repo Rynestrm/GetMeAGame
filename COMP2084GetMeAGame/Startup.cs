@@ -46,6 +46,9 @@ namespace COMP2084GetMeAGame
                     microsoftOptions.ClientSecret = Configuration["Authentication:Microsoft:ClientSecret"];
                 });
 
+            //enable sessions
+            services.AddSession();
+
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
@@ -71,6 +74,9 @@ namespace COMP2084GetMeAGame
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            //session support
+            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

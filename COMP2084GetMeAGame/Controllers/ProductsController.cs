@@ -30,6 +30,7 @@ namespace COMP2084GetMeAGame.Controllers
             return View(await applicationDbContext.OrderBy(p => p.Name).ToListAsync());
         }
 
+        [AllowAnonymous]
         // GET: Products/Details/
         public async Task<IActionResult> Details(int? id)
         {
