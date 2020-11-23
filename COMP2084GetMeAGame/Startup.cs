@@ -49,6 +49,9 @@ namespace COMP2084GetMeAGame
             //enable sessions
             services.AddSession();
 
+            //inject Configuration info so the shopcontroller can read API keys from addsettings.json
+            services.AddSingleton<IConfiguration>(Configuration);
+
             services.AddControllersWithViews();
             services.AddRazorPages();
         }
