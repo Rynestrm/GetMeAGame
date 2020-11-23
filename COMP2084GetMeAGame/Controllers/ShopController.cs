@@ -10,6 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
+//add references for stripe
+using Stripe;
+using System.Configuration;
+using Stripe.Checkout;
+
 namespace COMP2084GetMeAGame.Controllers
 {
     public class ShopController : Controller
@@ -146,7 +151,7 @@ namespace COMP2084GetMeAGame.Controllers
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Checkout([Bind("Address, City, Provence, PostalCode")]Order order)
+        public IActionResult Checkout([Bind("Address, City, Provence, PostalCode")] Models.Order order)
         {
             //auto fill 3 fields in form
             order.OrderDate = DateTime.Now;
@@ -167,13 +172,98 @@ namespace COMP2084GetMeAGame.Controllers
         public IActionResult Payment()
         {
             //get order from session variable
-            var order = HttpContext.Session.GetObject<Order>("Order");
+            var order = HttpContext.Session.GetObject<Models.Order>("Order");
             //fech and display the order total to customer
             ViewBag.Total = order.Total;
             // use view bag to set publishable key that we can read from the configuration
-            ViewBag.PublishableKey = _configuration.GetSection("Stripe")["PUblishableKey"];
-            // load the PAyment view
+            ViewBag.PublishableKey = _configuration.GetSection("Stripe")["PublishableKey"];
+            // load the Payment view
             return View();
+        }
+
+        // POST /shop/p
+        [Authorize]
+        [HttpPost]
+        public ActionResult ProcessPayment()
+        {
+            //get order from session variable
+            var order = HttpContext.Session.GetObject<Models.Order>("Order");
+
+            //get stripe secret key from configuration
+            StripeConfiguration.ApiKey = _configuration.GetSection("Stripe")["SecretKey"];
+
+            // .net integration code from: https://stripe.com/docs/checkout/integration-builder
+            var options = new SessionCreateOptions
+            {
+                PaymentMethodTypes = new List<string>
+                {
+                  "card",
+                },
+                LineItems = new List<SessionLineItemOptions>
+                {
+                  new SessionLineItemOptions
+                  {
+                    PriceData = new SessionLineItemPriceDataOptions
+                    {
+                      UnitAmount = (long?)(order.Total * 100),
+                      Currency = "cad",
+                      ProductData = new SessionLineItemPriceDataProductDataOptions
+                      {
+                        Name = "Comp 2084 Get Me A Game Purchase",
+                      },
+                    },
+                    Quantity = 1,
+                  },
+                },
+                Mode = "payment",
+                SuccessUrl = "https://" + Request.Host + "/Shop/SaveOrder",
+                CancelUrl = "https://" + Request.Host + "/Shop/Cart",
+            };
+            var service = new SessionService();
+            Session session = service.Create(options);
+            return Json(new { id = session.Id });
+        }
+
+        // get / Shop/SaveOrder
+        [Authorize]
+        public IActionResult SaveOrder()
+        {
+            //get current order from seassion
+            var order = HttpContext.Session.GetObject<Models.Order>("Order");
+
+            // make new order in database
+            _context.Orders.Add(order);
+            _context.SaveChanges();
+
+            //copy each item frmo cart to a new OrderDetail record
+            var cartItems = _context.Carts.Where(c => c.CustomerId == HttpContext.Session.GetString("CustomerId"));
+
+            foreach (var item in cartItems)
+            {
+                var OrderDetail = new OrderDetail
+                {
+                    OrderId = order.Id,
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    Cost = item.Price
+                };
+
+                _context.OrderDetails.Add(OrderDetail);
+            }
+
+            //save to DB
+            _context.SaveChanges();
+
+            //empty cart
+            foreach (var item in cartItems)
+            {
+                _context.Carts.Remove(item);
+            }
+
+            _context.SaveChanges();
+
+            //load details page for new order
+            return RedirectToAction("Details", "Orders", new { @Id = order.Id });
         }
 
     }

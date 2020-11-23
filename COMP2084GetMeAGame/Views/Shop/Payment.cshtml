@@ -1,21 +1,22 @@
-﻿<script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>
+﻿@*<script src="https://polyfill.io/v3/polyfill.min.js?version=3.52.1&features=fetch"></script>*@
 <script src="https://js.stripe.com/v3/"></script>
 <section>
     <div class="product">
         <div class="description">
-            <h3>Order Total</h3>
+            <h3>Your Order Total</h3>
             <h5>@String.Format("{0:c}", ViewBag.Total)</h5>
         </div>
     </div>
-    <button id="checkout-button">Checkout</button>
+    <button id="checkout-button" class="btn btn-primary">Continue to Payment >></button>
 </section>
 
 <script type="text/javascript">
     // Create an instance of the Stripe object with your publishable API key
-    var stripe = Stripe(@ViewBag.PublishableKey);
+    var stripe = Stripe("@ViewBag.PublishableKey");
     var checkoutButton = document.getElementById("checkout-button");
+
     checkoutButton.addEventListener("click", function () {
-      fetch("/create-session", {
+      fetch("/Shop/ProcessPayment", {
         method: "POST",
       })
         .then(function (response) {
@@ -40,3 +41,4 @@
         });
     });
 </script>
+

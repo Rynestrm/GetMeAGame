@@ -30,6 +30,11 @@
                                 Cart
                             </a>
                         </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Orders" asp-action="Index">My Orders</a>
+                        </li>}
                         @if (User.IsInRole("Administrator"))
                         {
                             <li class="nav-item">
