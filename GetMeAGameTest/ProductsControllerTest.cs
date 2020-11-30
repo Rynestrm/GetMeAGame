@@ -4,7 +4,9 @@ using COMP2084GetMeAGame.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace GetMeAGameTests
 {
@@ -27,15 +29,16 @@ namespace GetMeAGameTests
         {
             // create new in-memory db
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase("InMemoryDb")
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _context = new ApplicationDbContext(options);
+            _context.SaveChanges();
+
 
             // create mock data and add to in-memory db
             var category = new Category { Id = 300, Name = "Some Category" };
 
             _context.Categories.Add(category);
-            _context.SaveChanges();
 
             products.Add(new Product { Id = 46, Name = "Product Forty-Six", Price = 46.46, CategoryId = 300, Category = category });
             products.Add(new Product { Id = 88, Name = "Product Eight-Eight", Price = 88.88, CategoryId = 300, Category = category });
@@ -75,5 +78,47 @@ namespace GetMeAGameTests
             //assert
             Assert.AreEqual("Index", result.ViewName);
         }
+
+        [TestMethod]
+        public void IndexLoadsProducts()
+        {
+            // act - get view result then get model
+            var result = (ViewResult)controller.Index().Result;
+            var data = (List<Product>)result.Model;
+
+            //assert - check product list is the same as the data from Index() mothod
+            CollectionAssert.AreEqual(products.OrderBy(p => p.Name).ToList(), data);
+        }
+
+        [TestMethod]
+        public void DetailsLoadsDetailsViewValidId()
+        {
+            //act - use only Ids(46, 51, 88) of the mock products in the TestInitilaize
+            var result = (ViewResult)controller.Details(88).Result;
+
+            //assert
+            Assert.AreEqual("Details", result.ViewName);
+        }
+
+        [TestMethod]
+        public void DetailsNoIdReturnsErrorView()
+        {
+            //act
+            var result = (ViewResult)controller.Details(null).Result;
+
+            //assert
+            Assert.AreEqual("Error", result.ViewName);
+        }
+
+        [TestMethod]
+        public void DetailsInvalidIdReturnsErrorView()
+        {
+            //act
+            var result = (ViewResult)controller.Details(12).Result;
+
+            //assert
+            Assert.AreEqual("Error", result.ViewName);
+        }
+
     }
 }

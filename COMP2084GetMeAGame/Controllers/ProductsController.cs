@@ -36,7 +36,8 @@ namespace COMP2084GetMeAGame.Controllers
         {
             if (id == null)
             {
-                return NotFound();
+                //return NotFound();
+                return View("Error");
             }
 
             var product = await _context.Products
@@ -47,7 +48,12 @@ namespace COMP2084GetMeAGame.Controllers
                 return NotFound();
             }
 
-            return View(product);
+            return View("Details", product);
+        }
+
+        private IActionResult Error()
+        {
+            throw new NotImplementedException();
         }
 
         // GET: Products/Create
