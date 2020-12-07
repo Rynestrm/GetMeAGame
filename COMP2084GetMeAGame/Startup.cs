@@ -12,6 +12,7 @@ using COMP2084GetMeAGame.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Swashbuckle.Swagger;
 
 namespace COMP2084GetMeAGame
 {
@@ -54,6 +55,9 @@ namespace COMP2084GetMeAGame
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            //register the swgger generator to define an API spec document
+            services.AddSwaggerGen();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -87,6 +91,13 @@ namespace COMP2084GetMeAGame
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+            });
+
+            //set up endpoint of swagger API doc
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Get Me A Game API");
             });
         }
     }
